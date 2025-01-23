@@ -1,0 +1,244 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: trd_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    networks:
+      - trd_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  gateway:
+    build: gateway
+    container_name: trd_gateway
+    ports:
+      - "8000:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_auth:
+    build: service_auth
+    container_name: trd_auth
+    ports:
+      - "5001:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_match:
+    build: service_match
+    container_name: trd_match
+    ports:
+      - "5002:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_match:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_pari:
+    build: service_pari
+    container_name: trd_pari
+    ports:
+      - "5003:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_pari:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_panier:
+    build: service_panier
+    container_name: trd_panier
+    ports:
+      - "5004:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_panier:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_paiement:
+    build: service_paiement
+    container_name: trd_paiement
+    ports:
+      - "5005:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_paiement:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  service_notification:
+    build: service_notification
+    container_name: trd_notification
+    ports:
+      - "5006:5000"
+    env_file:
+      - ../../../Downloads/TheRealDeal/.env
+    restart: unless-stopped
+    depends_on:
+      db_notification:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - trd_network
+
+  db_auth:
+    image: postgres:13
+    container_name: trd_db_auth
+    environment:
+      - POSTGRES_DB=trd_auth_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_auth_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+  db_match:
+    image: postgres:13
+    container_name: trd_db_match
+    environment:
+      - POSTGRES_DB=trd_match_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_match_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_match_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+  db_pari:
+    image: postgres:13
+    container_name: trd_db_pari
+    environment:
+      - POSTGRES_DB=trd_pari_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_pari_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_pari_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+  db_panier:
+    image: postgres:13
+    container_name: trd_db_panier
+    environment:
+      - POSTGRES_DB=trd_panier_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_panier_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_panier_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+  db_paiement:
+    image: postgres:13
+    container_name: trd_db_paiement
+    environment:
+      - POSTGRES_DB=trd_paiement_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_paiement_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_paiement_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+  db_notification:
+    image: postgres:13
+    container_name: trd_db_notification
+    environment:
+      - POSTGRES_DB=trd_notification_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_notification_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d trd_notification_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trd_network
+
+networks:
+  trd_network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  db_auth_data:
+  db_match_data:
+  db_pari_data:
+  db_panier_data:
+  db_paiement_data:
+  db_notification_data:
