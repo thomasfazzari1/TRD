@@ -43,8 +43,13 @@ Domaine générique qui couvre la communication avec les utilisateurs via email 
 
 ## Architecture
 ### Schémas
-![Architecture Microservices](readme-assets/architecture.png)
-![Schéma BDD](readme-assets/bdds.png)
+| ![Architecture Microservices](readme-assets/architecture.png) | 
+|:--:| 
+| *Architecture des services* |
+
+| ![Schéma BDD](readme-assets/bdds.png) | 
+|:--:| 
+| *Schéma des bases de données* |
 
 
 ## Technologies utilisées
