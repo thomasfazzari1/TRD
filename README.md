@@ -1,5 +1,18 @@
 # TheRealDeal - Projet API M2 MIAGE 2024/2025
 
+
+## Sommaire
+- [Auteurs](#auteurs)
+- [À propos](#à-propos)
+- [Analyse du Domaine](#analyse-du-domaine)
+- [Architecture](#architecture)
+- [Technologies utilisées](#technologies-utilisées)
+- [Services](#services)
+- [Pattern des services](#pattern-des-services)
+- [Communication](#communication)
+- [Tests API](#tests-api)
+
+  
 ## Auteurs
 - FAZZARI Thomas
 - CHARTIER Guillaume
@@ -57,41 +70,41 @@ Domaine générique qui couvre la communication avec les utilisateurs via email 
 - Système de rôles (parieur, bookmaker)
 
   
-### Services
+## Services
 
-#### Gateway
+### Gateway
 - Point d'entrée
 - Routage des requêtes entre les microservices
 - Authentification et validation des tokens JWT
 - Gestion des timeouts et retries
 
-#### Authentication
+### Authentication
 - Gestion des comptes utilisateurs
 - Gestion des rôles (parieur, bookmaker)
 - Authentification (via tokens JWT) et inscription
   
-#### Match 
+### Match 
 - Gestion des données sportives
 - CRUD compétitions et équipes
 - Gestion des matchs et des côtes
 - Publication des résultats
 
-#### Pari
+### Pari
 - Gestion des paris simples et combinés
 - Vérification des contraintes (délais, limites, cagnotte suffisante)
 - Calcul et distribution des gains
 
-#### Panier
+### Panier
 - Gestion des paris multiples
 - Vérification des contraintes (délais, limites, cagnotte suffisante)
 
-#### Paiement  
+### Paiement  
 - Gestion des dépôts et retraits
 - Distribution des gains, remboursements, annulations
 - Historisation des transactions
 - Vérification des soldes
 
-#### Notification (pas implémenté)
+### Notification (pas implémenté)
 - Envoi des notifications via e-mail et SMS (gains, scores en direct, ...)
 
 
@@ -110,9 +123,9 @@ Chaque microservice suit une architecture standardisée :
         └── rabbitmq.py   # Utilitaires RabbitMQ
 ```
 
-### Communication
+## Communication
 
-#### Communication Synchrone (via REST)
+### Communication Synchrone (via REST)
 Utilisée pour les requêtes nécessitant une réponse immédiate, par exemple :
 - Authentification/Autorisation
 - Consultation des matchs et cotes
@@ -120,7 +133,7 @@ Utilisée pour les requêtes nécessitant une réponse immédiate, par exemple :
 - Vérifications de solde
 - Transactions financières
 
-#### Communication Asynchrone (via RabbitMQ)
+### Communication Asynchrone (via RabbitMQ)
 Gérée via des queues pour les événements :
 
 **match_resultats**
@@ -138,6 +151,6 @@ Gérée via des queues pour les événements :
 **panier_updates**
 - Création et validation des paniers
 
-#### Tests API
+## Tests API
 
 La collection Postman est disponible dans le fichier [TRD-Postman.json](./TRD-Postman.json). Elle contient les tests pour tous les services implémentés, vérifiant les codes de retour, les formats de réponse et les cas d'erreur.
