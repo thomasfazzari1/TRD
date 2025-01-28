@@ -24,7 +24,7 @@ services:
     ports:
       - "8000:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       rabbitmq:
@@ -38,7 +38,7 @@ services:
     ports:
       - "5001:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_auth:
@@ -54,7 +54,7 @@ services:
     ports:
       - "5002:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_match:
@@ -70,7 +70,7 @@ services:
     ports:
       - "5003:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_pari:
@@ -86,7 +86,7 @@ services:
     ports:
       - "5004:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_panier:
@@ -102,7 +102,7 @@ services:
     ports:
       - "5005:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_paiement:
@@ -118,7 +118,7 @@ services:
     ports:
       - "5006:5000"
     env_file:
-      - ../../../Downloads/TheRealDeal/.env
+      - .env
     restart: unless-stopped
     depends_on:
       db_notification:

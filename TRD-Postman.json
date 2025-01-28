@@ -1,0 +1,2381 @@
+{
+	"info": {
+		"_postman_id": "db8cf4d7-6a5b-4644-b9b2-d9c7555c11ef",
+		"name": "TheRealDeal",
+		"description": "Collections de tests pour l'architecture micro-service du projet TheRealDeal.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39606358"
+	},
+	"item": [
+		{
+			"name": "Authentification",
+			"item": [
+				{
+					"name": "Inscription Parieur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Inscription status\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400]);",
+									"});",
+									"",
+									"pm.test(\"Response format\", () => {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 201) {",
+									"        pm.expect(response).to.have.property('email');",
+									"        pm.expect(response).to.have.property('role');",
+									"        pm.expect(response.role).to.eql('parieur');",
+									"    } else if (pm.response.code === 400) {",
+									"        pm.expect(response).to.have.property('message');",
+									"        pm.expect(response.message).to.include('Email déjà utilisé');",
+									"    }",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.environment.set(\"parieur_token\", pm.response.json().token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@test.com\",\n    \"mot_de_passe\": \"test123\",\n    \"role\": \"parieur\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/auth/inscription",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"auth",
+								"inscription"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inscription Bookmaker",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Inscription bookmaker\", () => {",
+									"   pm.expect(pm.response.code).to.be.oneOf([201, 400]);",
+									"   const response = pm.response.json();",
+									"",
+									"   if (pm.response.code === 201) {",
+									"       pm.expect(response).to.include.all.keys('email', 'role', 'numero_employe');",
+									"       pm.expect(response.role).to.eql('bookmaker');",
+									"       pm.environment.set(\"bookmaker_token\", response.token);",
+									"   } else {",
+									"       pm.expect(response.message).to.include('Email déjà utilisé');",
+									"   }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bookmaker@bet.com\",\n    \"mot_de_passe\": \"book123\",\n    \"role\": \"bookmaker\",\n    \"numero_employe\": \"BK123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/auth/inscription",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"auth",
+								"inscription"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connexion Parieur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Connexion\", () => {",
+									"   pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"   const response = pm.response.json();",
+									"",
+									"   if (pm.response.code === 200) {",
+									"       pm.expect(response).to.have.property('token');",
+									"       pm.environment.set(\"user_token\", response.token);",
+									"   } else {",
+									"       pm.expect(response.message).to.include('Identifiants invalides');",
+									"   }",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@test.com\",\n    \"mot_de_passe\": \"test123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/auth/connexion",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"auth",
+								"connexion"
+							]
+						},
+						"description": "Renvoie un token jwt à utiliser en header dans certaines des requêtes, comme par exemple celles de la collection pari où un profil parieur est requis (ex : placer un pari)."
+					},
+					"response": []
+				},
+				{
+					"name": "Connexion Bookmaker",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Connexion\", () => {",
+									"   pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"   const response = pm.response.json();",
+									"",
+									"   if (pm.response.code === 200) {",
+									"       pm.expect(response).to.have.property('token');",
+									"       pm.environment.set(\"user_token\", response.token);",
+									"   } else {",
+									"       pm.expect(response.message).to.include('Identifiants invalides');",
+									"   }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bookmaker@bet.com\",\n    \"mot_de_passe\": \"book123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/auth/connexion",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"auth",
+								"connexion"
+							]
+						},
+						"description": "Renvoie un token jwt à utiliser en header dans certaines des requêtes, notamment celles de la collection match où un profil bookmaker est requis (ex : ajout de match)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cagnotte",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get Cagnotte Response\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(response).to.have.property('cagnotte');",
+									"        pm.expect(response.cagnotte).to.be.a('number');",
+									"    } else if (pm.response.code === 401) {",
+									"        pm.expect(response).to.have.property('message');",
+									"        pm.expect(response.message).to.include('Token');",
+									"    } else if (pm.response.code === 403) {",
+									"        pm.expect(response).to.have.property('message');",
+									"        pm.expect(response.message).to.equal('Non autorisé');",
+									"    } else {",
+									"        pm.expect(response).to.have.property('message');",
+									"        pm.expect(response.message).to.include('non trouvé');",
+									"    }",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzcxNzM2M30.vJ1IvD6bllkJibIpo5Lfo1ratcsmu9XZZUFkcXcWQrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/auth/utilisateur/1/cagnotte",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"auth",
+								"utilisateur",
+								"1",
+								"cagnotte"
+							]
+						},
+						"description": "Renvoie la cagnotte courante du parieur 1 à condition de fournir son token."
+					},
+					"response": []
+				}
+			],
+			"description": "Dossier contenant les requêtes permettant de tester le service d'Authentification."
+		},
+		{
+			"name": "Match",
+			"item": [
+				{
+					"name": "Gestion des équipes",
+					"item": [
+						{
+							"name": "Ajout \"PSG\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Ajout Equipe\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401]);",
+											"    const response = pm.response.json();",
+											"",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"",
+											"    if (pm.response.code === 201) {",
+											"        pm.expect(response).to.have.property('id');",
+											"        pm.expect(response.message).to.equal('Équipe créée');",
+											"    } else {",
+											"        pm.expect(response.message).to.equal('Équipe déjà existante');",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM5MjE1N30.F3SpaiPWTxOeJiCeG6MT-VCauJmToB49GbYaJ9GqD-Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"PSG\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"OM\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"OM\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"OL\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"OL\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"Bayern Munich\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Bayern Munich\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"Real Madrid\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Real Madrid\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Rename  \"Real Madrid\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Update Equipe\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401]);",
+											"    const response = pm.response.json();",
+											"",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"    ",
+											"    if (pm.response.code === 200) {",
+											"        pm.expect(response.message).to.equal('Équipe mise à jour');",
+											"    } else {",
+											"        pm.expect(response.message).to.include('Équipe avec ce nom existe déjà');",
+											"    }",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nom\": \"Real Madrid CF\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes/5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete \"Real Madrid\"",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nom\": \"Real Madrid CF\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes/5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/equipes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"equipes"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Requêtes permettant au bookmaker de gérer les données des équipes (ajout, suppression, modification)"
+				},
+				{
+					"name": "Gestion des compétitions",
+					"item": [
+						{
+							"name": "Ajout \"Ligue 1\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Création Compétition\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401]);",
+											"    const response = pm.response.json();",
+											"",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"    ",
+											"    if (pm.response.code === 201) {",
+											"        pm.expect(response).to.have.property('id');",
+											"        pm.expect(response.message).to.equal('Compétition créée');",
+											"    } else {",
+											"        pm.expect(response.message).to.equal('Compétition déjà existante');",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n \"nom\": \"Ligue 1\",\n \"slug\": \"ligue-1\",\n \"actif\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/competitions",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"competitions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"Ligue des Champions\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Ligue des Champions\",\n    \"slug\": \"ligue-des-champions\",\n    \"actif\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/competitions",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"competitions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"Serie A\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Serie A\",\n    \"slug\": \"serie-a\",\n    \"actif\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/competitions",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"competitions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update \"Série A\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Update Compétition\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401]);",
+											"    const response = pm.response.json();",
+											"",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"    ",
+											"    if (pm.response.code === 200) {",
+											"        pm.expect(response.message).to.equal('Compétition mise à jour');",
+											"    } else {",
+											"        pm.expect(response.message).to.include('Une compétition avec ce nom existe déjà');",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Série A\",\n    \"slug\": \"serie-a\",\n    \"actif\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/competitions/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"competitions",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNjQxMDY1OH0.bWs4ctISCZXO-Z-9wJOmLL4wA56XeQK_LYfw2glMXlQ",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/competitions",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"competitions"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Requêtes permettant au bookmaker de gérer les données des compétitions sportives (ajout, suppression, modification)"
+				},
+				{
+					"name": "Gestion des  matchs",
+					"item": [
+						{
+							"name": "Ajout \"PSG-OM\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Ajout Match\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401]);",
+											"    const response = pm.response.json();",
+											"    ",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"    ",
+											"    if (pm.response.code === 201) {",
+											"        pm.expect(response).to.have.property('id');",
+											"        pm.expect(response.message).to.equal('Match créé');",
+											"    } else {",
+											"        pm.expect(response.message).to.be.oneOf([",
+											"            'Les équipes doivent être différentes',",
+											"            'Date du match doit être future',",
+											"            'Les cotes doivent être positives'",
+											"        ]);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"competition_id\": 1,\n    \"equipe_domicile_id\": 1,\n    \"equipe_exterieur_id\": 2,\n    \"date_match\": \"2026-01-10T20:00:00\",\n    \"cote_domicile\": 1.5,\n    \"cote_nul\": 3.5,\n    \"cote_exterieur\": 6.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"PSG-OL\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n   \"competition_id\": 1,\n   \"equipe_domicile_id\": 3,\n   \"equipe_exterieur_id\": 1,\n   \"date_match\": \"2024-01-21T20:00:00\", \n   \"cote_domicile\": 3.2,\n   \"cote_nul\": 3.5,\n   \"cote_exterieur\": 1.9\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"OL-OM\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n   \"competition_id\": 1,\n   \"equipe_domicile_id\": 2,\n   \"equipe_exterieur_id\": 3,\n   \"date_match\": \"2024-01-28T20:00:00\",\n   \"cote_domicile\": 2.1,\n   \"cote_nul\": 3.3,\n   \"cote_exterieur\": 3.0\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout \"Bayern-PSG\"",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n   \"competition_id\": 3,\n   \"equipe_domicile_id\": 4,\n   \"equipe_exterieur_id\": 1,\n   \"date_match\": \"2024-02-14T20:00:00\",\n   \"cote_domicile\": 1.8,\n   \"cote_nul\": 3.5,\n   \"cote_exterieur\": 4.2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout Match date dépassée",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"competition_id\": 1,\n    \"equipe_domicile_id\": 1,\n    \"equipe_exterieur_id\": 2,\n    \"date_match\": \"2023-01-10T20:00:00\",\n    \"cote_domicile\": 1.5,\n    \"cote_nul\": 3.5,\n    \"cote_exterieur\": 6.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout Match même équipe",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"competition_id\": 1,\n    \"equipe_domicile_id\": 1,\n    \"equipe_exterieur_id\": 1,\n    \"date_match\": \"2024-03-10T20:00:00\",\n    \"cote_domicile\": 1.5,\n    \"cote_nul\": 3.5,\n    \"cote_exterieur\": 6.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Score \"Bayern-PSG\"",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Update Score Match\", () => {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401]);",
+											"    const response = pm.response.json();",
+											"    ",
+											"    if (pm.response.code === 401) {",
+											"        pm.expect(response.message).to.include('Token');",
+											"        return;",
+											"    }",
+											"    ",
+											"    if (pm.response.code === 200) {",
+											"        pm.expect(response.message).to.equal('Score mis à jour');",
+											"    } else {",
+											"        pm.expect(response.message).to.include('Match non trouvé');",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"score_domicile\": 2,\n  \"score_exterieur\": 1,\n  \"statut\": \"terminé\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/4/score",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"4",
+										"score"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Cotes \"Bayern-PSG\"",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"cote_domicile\": 1.60,\n  \"cote_nul\": 3.20,\n  \"cote_exterieur\": 4.20\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches/4/cotes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches",
+										"4",
+										"cotes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Matchs de Ligue 1",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches?competition_id=1 ",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									],
+									"query": [
+										{
+											"key": "competition_id",
+											"value": "1 "
+										}
+									]
+								},
+								"description": "Renvoie l'ensemble des matchs de la compétition \"Ligue 1\""
+							},
+							"response": []
+						},
+						{
+							"name": "Get Matchs PSG",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches?equipe_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									],
+									"query": [
+										{
+											"key": "equipe_id",
+											"value": "1"
+										}
+									]
+								},
+								"description": "Renvoie l'ensemble des matchs du PSG"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Matchs En Cours",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImJvb2ttYWtlckBiZXQuY29tIiwicm9sZSI6ImJvb2ttYWtlciIsImV4cCI6MTczNzM4Mzg4OX0.8Y_pkSSJ2tjQTMCWxmtQG3imSGVZ-5xaju9I2PIKbPk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8000/matches?statut=terminé",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"matches"
+									],
+									"query": [
+										{
+											"key": "statut",
+											"value": "terminé"
+										}
+									]
+								},
+								"description": "Renvoie l'ensemble des matchs en cours"
+							},
+							"response": []
+						}
+					],
+					"description": "Requêtes permettant au bookmaker de gérer les données des matchs, leur score et leurs côtes (ajout, suppression, modification)"
+				}
+			],
+			"description": "Dossier contenant les requêtes permettant de tester le service Match."
+		},
+		{
+			"name": "Paiement",
+			"item": [
+				{
+					"name": "Dépot cagnotte parieur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Dépôt Transaction\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 201) {",
+									"        pm.expect(response).to.have.property('id');",
+									"        pm.expect(response.message).to.equal('Dépôt effectué');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzcxNzM2M30.vJ1IvD6bllkJibIpo5Lfo1ratcsmu9XZZUFkcXcWQrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"utilisateur_id\": 1,\n    \"montant\": 100.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/depot",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"depot"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement gain utilisateur 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"utilisateur_id\": 1,\n    \"montant\": 50.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/gain",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"gain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement remboursement utilisateur 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"utilisateur_id\": 1,\n    \"montant\": 25.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/remboursement",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"remboursement"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement retrait utilisateur 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Retrait Transaction\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 201) {",
+									"        pm.expect(response).to.have.property('id');",
+									"        pm.expect(response.message).to.equal('Retrait effectué');",
+									"    } else if (pm.response.code === 400) {",
+									"        pm.expect(response.message).to.be.oneOf([",
+									"            'Solde insuffisant',",
+									"            'Impossible de vérifier le solde'",
+									"        ]);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzcxNzM2M30.vJ1IvD6bllkJibIpo5Lfo1ratcsmu9XZZUFkcXcWQrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"utilisateur_id\": 1,\n   \"montant\": 80.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/retrait",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"retrait"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement retrait solde insuffisant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"utilisateur_id\": 1,\n   \"montant\": 8000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/retrait",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"retrait"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get transactions parieur 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get Transactions Utilisateur\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"    const response = pm.response.json();",
+									"",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    pm.expect(response).to.be.an('array');",
+									"    if (response.length > 0) {",
+									"        pm.expect(response[0]).to.include.all.keys(",
+									"            'id',",
+									"            'utilisateur_id',",
+									"            'type_transaction',",
+									"            'montant',",
+									"            'reference',",
+									"            'statut'",
+									"        );",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzcxNzM2M30.vJ1IvD6bllkJibIpo5Lfo1ratcsmu9XZZUFkcXcWQrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/transactions/utilisateur/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"transactions",
+								"utilisateur",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Dossier contenant les requêtes permettant de tester le service Paiement."
+		},
+		{
+			"name": "Pari",
+			"item": [
+				{
+					"name": "Enregistrement d'un pari",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzcxNzM2M30.vJ1IvD6bllkJibIpo5Lfo1ratcsmu9XZZUFkcXcWQrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"match_id\": 1,\n    \"type_pari\": \"domicile\",\n    \"montant\": 50.00,\n    \"cote\": 1.50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/paris",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"paris"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement d'un pari solde insuffisant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"match_id\": 5,\n    \"type_pari\": \"domicile\",\n    \"montant\": 1000000000.00,\n    \"cote\": 1.50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/paris",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"paris"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement d'un pari sur match terminé",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"match_id\": 2,\n    \"type_pari\": \"domicile\",\n    \"montant\": 10.00,\n    \"cote\": 1.50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/paris",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"paris"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enregistrement d'un pari combiné",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Placer Pari Combiné\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401, 403, 404]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    if (pm.response.code === 403) {",
+									"        pm.expect(response.message).to.equal('Accès non autorisé');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 201) {",
+									"        pm.expect(response).to.include.keys('id', 'message');",
+									"        pm.expect(response.message).to.equal('Pari combiné placé');",
+									"    } else {",
+									"        pm.expect(response.message).to.be.oneOf([",
+									"            'Match introuvable',",
+									"            'Match non disponible',",
+									"            'Match déjà passé',",
+									"            'Cagnotte insuffisante',",
+									"            'Échec du retrait'",
+									"        ]);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"montant\": 10.00,\n    \"paris\": [\n        {\n            \"match_id\": 1,\n            \"type_pari\": \"domicile\",\n            \"cote\": 1.50\n        },\n        {\n            \"match_id\": 2,\n            \"type_pari\": \"exterieur\",\n            \"cote\": 2.10\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/paris/groupe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"paris",
+								"groupe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Annulation de pari",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Annulation Pari\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    if (pm.response.code === 403) {",
+									"        pm.expect(response.message).to.equal('Accès non autorisé');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(response.message).to.equal('Pari annulé et remboursé');",
+									"    } else {",
+									"        pm.expect(response.message).to.be.oneOf([",
+									"            \"Impossible d'annuler ce pari\",",
+									"            \"Délai d'annulation dépassé\",",
+									"            \"Erreur lors de l'annulation\",",
+									"            'Échec du remboursement'",
+									"        ]);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzQwMjExNn0.tywxIUyYNDz-xahSPLtTaQ50rkCz7hb7aqu07IZ9SVY",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"motif\": \"Erreur de sélection\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/paris/1/annulation",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"paris",
+								"1",
+								"annulation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Dossier contenant les requêtes permettant de tester le service Pari."
+		},
+		{
+			"name": "Panier",
+			"item": [
+				{
+					"name": "Créer Panier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Création Panier\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400, 401, 403]);",
+									"    const response = pm.response.json();",
+									"    ",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    if (pm.response.code === 403) {",
+									"        pm.expect(response.message).to.equal('Accès non autorisé');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 201) {",
+									"        pm.expect(response).to.have.property('id');",
+									"        pm.expect(response.message).to.equal('Panier créé');",
+									"    } else {",
+									"        pm.expect(response.message).to.equal('Un match ne peut pas être sélectionné plusieurs fois');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type_pari\": \"simple\",\r\n    \"mise_totale\": 10.00,\r\n    \"paris\": [{\r\n        \"match_id\": 1,\r\n        \"pronostic\": \"domicile\", \r\n        \"cote\": 1.50\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/panier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"panier"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Valider Panier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Validation Panier\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403]);",
+									"    const response = pm.response.json();",
+									"",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    if (pm.response.code === 403) {",
+									"        pm.expect(response.message).to.equal('Accès non autorisé');",
+									"        return;",
+									"    }",
+									"    ",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(response.message).to.equal('Panier validé');",
+									"    } else if (pm.response.code === 400) {",
+									"        pm.expect(response.message).to.equal('Ce panier ne peut plus être validé');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/panier/1/validation",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"panier",
+								"1",
+								"validation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Paniers du Parieur 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get Paniers Utilisateur\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+									"    const response = pm.response.json();",
+									"",
+									"    if (pm.response.code === 401) {",
+									"        pm.expect(response.message).to.include('Token');",
+									"        return;",
+									"    }",
+									"",
+									"    if (pm.response.code === 403) {",
+									"        pm.expect(response.message).to.equal('Accès non autorisé');",
+									"        return;",
+									"    }",
+									"",
+									"    pm.expect(response).to.be.an('array');",
+									"    if (response.length > 0) {",
+									"        pm.expect(response[0]).to.include.all.keys(",
+									"            'id', ",
+									"            'utilisateur_id',",
+									"            'type_pari',",
+									"            'mise_totale',",
+									"            'statut'",
+									"        );",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoicGFyaWV1ciIsImV4cCI6MTczNzM4MzcxN30.lqVr_Bm3yW7B63y5UiTRyydn4KPF_eVLpzdZiUOoEOE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/panier/utilisateur/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"panier",
+								"utilisateur",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Dossier contenant les requêtes permettant de tester le service Panier."
+		},
+		{
+			"name": "Notification",
+			"item": [],
+			"description": "Dossier contenant les requêtes permettant de tester le service Notification."
+		}
+	]
+}
